@@ -1,14 +1,15 @@
 import requests
 from bookingengine import Scraper, Flight
 from lxml import etree
+import datetime
 import pickle
 
 class Flydanaair(Scraper):
 
-    def __init__(self, host, dc, ac, date, tt='OW', fl='on', return_date=''):
+    def __init__(self, host, dc, ac, date, return_date=None, tt='OW', fl='on'):
         super(Flydanaair, self).__init__(host, dc, ac, date, return_date)
 
-        self.flight = {'TT': tt,
+        self.flight = {'TT': 'RT' if self.return_date else tt,
                        'DC': dc,
                        'AC': ac,
                        'AM': self.year + '-' + self.month,
@@ -18,43 +19,49 @@ class Flydanaair(Scraper):
                        'PI': '0',
                        'FL': fl,
                        'CD': ''}
+        if self.return_date:
+            self.flight.update({'RM': self.ryear + '-' + self.rmonth,
+                                'RD': self.rday})
 
     def make_request(self):
-        '''request = requests.get('https://secure.flydanaair.com/bookings/flight_selection.aspx',
+        request = requests.get('https://secure.flydanaair.com/bookings/flight_selection.aspx',
                                params=self.flight,
                                headers=self.headers,
-                               verify=False)'''
-        #self.content = etree.HTML(request.content)
+                               verify=False)
+        self.content = etree.HTML(request.content)
 
-        text = open('res_text.pkl', 'r')
+        '''text = open('res_text.pkl', 'r')
         text = pickle.load(text)
 
-        self.content = etree.HTML(text)
+        self.content = etree.HTML(text)'''
 
-    def get_info(self):
+    def get_info(self, direction):
         flights = []
-        tbody_node = self.content.xpath('//*[@id="trip_1_date_' + self.year + '_' + self.month + '_' + self.day + '"]/tbody/tr')
+        trip_num = '2' if direction == 'return' else '1'
+        classes = self.content.xpath("//*[starts-with(@id, 'trip_"+ trip_num + "') and contains(@class, 'requested-date')]/thead/tr/th/span/text()")
+        tbody_node = self.content.xpath("//*[starts-with(@id, 'trip_"+ trip_num + "') and contains(@class, 'requested-date')]/tbody/tr") #_date_' + self.year + '_' + self.month + '_' + self.day + '"]/tbody/tr')
         if not tbody_node:
             return -1
         else:
             for item in tbody_node:
                 cur_fl = Flight()
                 cur_fl.currency = 'NGN'
-                cur_fl.leaving_time = item.xpath('.//td[@class="time leaving"]/text()')
-                cur_fl.landing_time = item.xpath('.//td[@class="time landing"]/text()')
-                cur_fl.duration = 'DURATION'
+                cur_fl.leaving_time = item.xpath('.//td[@class="time leaving"]/text()')[0]
+                cur_fl.landing_time = item.xpath('.//td[@class="time landing"]/text()')[0]
+                cur_fl.calculate_duration()
                 cur_fl.costs = item.xpath(".//*[starts-with(@class, 'family')]/label/span/text()")
-                cur_fl.classes = item.xpath(".//*[starts-with(@class, 'family')]/@class")
+                cur_fl.classes = classes                            #.//*[starts-with(@class, 'family')]/@class")
                 flights.append(cur_fl)
             return flights
 
 
-r = Flydanaair('secure.flydanaair.com', 'LOS', 'PHC', '16/01/2018')
+r = Flydanaair('secure.flydanaair.com', 'LOS', 'PHC', '16/01/2018', '20/01/2018')
 
 content = r.make_request()
-info = r.get_info()
-for i in info:
-    print i
+#info = r.get_info('return')
+#for i in info:
+#    print i
+r.combine_flights()
 
 '''out1 = open('res_cont.pkl', 'wb')
 pickle.dump(content.content, out1)

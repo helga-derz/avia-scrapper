@@ -3,8 +3,8 @@ import datetime
 
 
 def reformat_date(date):
-    day = str(date.day) if str(date.day) == 2 else '0' + str(date.day)
-    month = str(date.month) if str(date.month) == 2 else '0' + str(date.month)
+    day = str(date.day) if len(str(date.day)) == 2 else '0' + str(date.day)
+    month = str(date.month) if len(str(date.month)) == 2 else '0' + str(date.month)
     year = str(date.year)
     return day, month, year
 
@@ -16,16 +16,38 @@ class Flight(object):
         self.costs = []
         self.classes = []
         self.currency = None
+        self.with_cost = True
+
+    def calculate_duration(self):
+        landing_hour, landing_minute = map(int, self.landing_time.split(':'))
+        leaving_hour, leaving_minute = map(int, self.leaving_time.split(':'))
+
+        leaving = datetime.timedelta(hours=leaving_hour, minutes=leaving_minute)
+        landing = datetime.timedelta(hours=landing_hour, minutes=landing_minute)
+
+        if landing < leaving:
+            self.duration = landing + (datetime.timedelta(hours=24,minutes=0) - leaving)
+        else:
+            self.duration = landing - leaving
+
 
     def __str__(self):
-        class_cost = ''
-        for i in range(len(self.costs)):
-            class_cost += '\tclass: ' + self.classes[i] + ' cost: ' + self.costs[i] + ' ' + self.currency + '\n'
-        return ('leaving time: {0} \n'
-                'landing time: {1} \n'
-                'duration: {2} \n'
-                '**********\n'.format(self.leaving_time, self.landing_time, self.duration) +
-                class_cost)
+
+
+        if self.with_cost:
+            class_cost = ''
+            for i in range(len(self.costs)):
+                class_cost += '\tclass: ' + self.classes[i] + ' cost: ' + self.costs[i] + ' ' + self.currency + '\n'
+            return ('leaving time: {0} \n'
+                        'landing time: {1} \n'
+                        'duration: {2} \n'
+                        '**********\n'.format(self.leaving_time, self.landing_time, self.duration) +
+                        class_cost)
+        else:
+            return ('leaving time: {0} \n'
+                        'landing time: {1} \n'
+                        'duration: {2} \n'
+                        .format(self.leaving_time, self.landing_time, self.duration))
 
 
 class Scraper(object):
@@ -36,6 +58,7 @@ class Scraper(object):
 
         self.from_ = dc
         self.to = ac
+        self.return_date = return_date
 
         try:
             d = map(int, date.split('/'))
@@ -57,6 +80,38 @@ class Scraper(object):
 
     def change_ip(self):
         pass
+
+    def get_info(self, direction):
+        pass
+
+    def combine_flights(self):
+        if not self.return_date:
+            for flight in self.get_info('to'):
+                print flight
+        else:
+
+            flights_to = self.get_info('to')
+            flights_return = self.get_info('return')
+
+            res = []
+
+            for ft in flights_to:
+                ft.with_cost = False
+                info_ft = "To: \n" + str(ft)
+                for fr in flights_return:
+                    fr.with_cost = False
+                    info_fr = "From: \n" + str(fr)
+                    for i in range(len(ft.classes)):
+                        for j in range(len(fr.classes)):
+                            res.append((info_ft + 'class: ' + ft.classes[i] + ' cost: ' + ft.costs[i] + ' ' + ft.currency + '\n' + "\n" + info_fr + 'class: ' + fr.classes[j] + ' cost: ' + fr.costs[j] + ' ' + fr.currency + '\n', float(ft.costs[i].replace(",","")) + float(fr.costs[j].replace(",",""))))
+
+            index = 1
+            for flight in sorted(res, key = lambda x: x[1]):
+                print "Combination N" + str(index)
+                print flight[0] + "\n Final cost: " + str(flight[1]) +"\n"
+                print "#############"
+                index += 1
+
 
 
 
