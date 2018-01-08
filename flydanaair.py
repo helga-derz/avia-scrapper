@@ -7,7 +7,7 @@ class Flydanaair(Scraper):
 
     def __init__(self, host, dc, ac, date, return_date=None):
         super(Flydanaair, self).__init__(host, dc, ac, date, return_date)
-
+        self.content = etree.HTML()
         self.flight = {'TT': 'RT' if self.return_date else 'OW',
                        'DC': dc,
                        'AC': ac,
@@ -35,11 +35,6 @@ class Flydanaair(Scraper):
         if request.status_code == '404':
             raise ValueError
         self.content = etree.HTML(request.content)
-
-        '''text = open('res_text.pkl', 'r')
-        text = pickle.load(text)
-
-        self.content = etree.HTML(text)'''
 
     def get_info(self, direction):
         flights = []
