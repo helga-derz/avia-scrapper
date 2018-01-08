@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-
 def reformat_date(date):
     day = str(date.day) if len(str(date.day)) == 2 else '0' + str(date.day)
     month = str(date.month) if len(str(date.month)) == 2 else '0' + str(date.month)
@@ -54,7 +53,10 @@ class Scraper(object):
 
     def __init__(self, host, dc, ac, date, return_date=None):
         self.headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                                      'Chrome/63.0.3239.84 Safari/537.36', 'Host': host}
+                                      'Chrome/63.0.3239.84 Safari/537.36', 'Host': host,'Upgrade-Insecure-Requests': '1',
+                                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                                     'Accept-Encoding': 'gzip, deflate, br',
+                                     'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
 
         self.from_ = dc
         self.to = ac

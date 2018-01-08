@@ -4,6 +4,9 @@ from lxml import etree
 import datetime
 import pickle
 
+import urllib2
+
+
 class Biman(Scraper):
 
     def __init__(self, host, dc, ac, date, return_date=None, tt='OW', fl='on'):
@@ -20,9 +23,6 @@ class Biman(Scraper):
                        'FL': fl,
                        'CD': '',
                        'CC': '',
-                       'x': '130',
-                       'y': '35',
-                       'FS': '1C43OB38',
                        'PT': ''}
         if self.return_date:
             self.flight.update({'RM': self.ryear + '-' + self.rmonth,
@@ -32,10 +32,31 @@ class Biman(Scraper):
                                 'RD': self.day})
 
     def make_request(self):
+        self.headers['Referer'] = 'https://www.biman-airlines.com/bookings/flight_selection.aspx'
+        self.headers['X-Hash-Validate'] = "&".join([x +"=" + self.flight[x] for x in self.flight])
+        request = requests.head('https://www.biman-airlines.com/bookings/captcha.aspx',
+                               headers=self.headers,
+                               verify=False)
+
+        self.headers['Cookie'] = "ASPSESSIONIDACRBQQBR=MBGMBHDBDDMNCDEJIDANGKKJ;ASPSESSIONIDSSBDTSDT=NEBKNPNBJBLJLLDCPMJGKLAC" + ";BNI_bg_zapways="+request.cookies['BNI_bg_zapways'] + ";chocolateChip=" + request.cookies['chocolateChip']
+        self.flight['FS'] =request.headers['X-Hash']
+        self.headers.pop('X-Hash-Validate')
+        print request.status_code
+        print request.headers
+        import socket
+
+        # proxy = urllib2.ProxyHandler({'http': '82.208.128.162:8118'})
+        # opener = urllib2.build_opener(proxy)
+        # urllib2.install_opener(opener)
+        # ip = urllib2.urlopen('https://www.biman-airlines.com/bookings/flight_selection.aspx').read()
+        # print ip
+
         request = requests.get('https://www.biman-airlines.com/bookings/flight_selection.aspx',
                                params=self.flight,
                                headers=self.headers,
                                verify=False)
+        print request.status_code
+        print request.headers
         self.content = etree.HTML(request.content)
 
 
@@ -68,7 +89,7 @@ class Biman(Scraper):
             return flights
 
 
-r = Biman('www.biman-airlines.com', 'DAC', 'KUL', '10/01/2018')
+r = Biman('www.biman-airlines.com', 'DAC', 'KUL', '18/02/2018')
 
 content = r.make_request()
 #info = r.get_info('return')
