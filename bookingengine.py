@@ -102,18 +102,31 @@ class Scraper(object):
             print 'некорректная дата'
             raise ValueError
 
-        self.flight = {
-            'TT': 'RT' if self.return_date else 'OW',
-            'DC': dc,
-            'AC': ac,
-            'AM': self.year + '-' + self.month,
-            'AD': self.day,
-            'PA': '1',
-            'PC': '0',
-            'PI': '0',
-            'FL': 'on',
-            'CD': ''
-        }
+        # self.flight = {
+        #     'TT': 'RT' if self.return_date else 'OW',
+        #     'DC': dc,
+        #     'AC': ac,
+        #     'AM': self.year + '-' + self.month,
+        #     'AD': self.day,
+        #     'PA': '1',
+        #     'PC': '0',
+        #     'PI': '0',
+        #     'FL': 'on',
+        #     'CD': ''
+        # }
+
+        self.flight = [
+            ('TT', 'RT' if self.return_date else 'OW'),
+             ('DC', dc),
+            (   'AC', ac),
+        (   'AM', self.year + '-' + self.month),
+        (   'AD', self.day),
+        (   'PA', '1'),
+        (   'PC', '0'),
+        (   'PI', '0'),
+        (   'FL', 'on'),
+        ('CD', '')
+        ]
 
     def change_ip(self):
         pass

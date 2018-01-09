@@ -11,41 +11,54 @@ class Biman(Scraper):
         self.content = ''
 
         if self.return_date:
-            self.flight.update({'RM': self.ryear + '-' + self.rmonth,
-                                'RD': self.rday,
-                                'CC': '',
-                                'PT': ''})
+            self.flight += [('RM', self.ryear + '-' + self.rmonth),
+                               ('RD', self.rday),
+                                ('CC', ''),
+                                 ('PT','')]
         else:
-            self.flight.update({'RM': self.year + '-' + self.month,
-                                'RD': self.day,
-                                'CC': '',
-                                'PT': ''})
+            self.flight += [('RM', self.year + '-' + self.month),
+                                       ('RD', self.day),
+                                              ('CC', ''),
+                                                     ('PT', '')]
 
     def make_request(self):
         """
             Make request and save it as xml tree
         """
-        s = requests.session()
+        s = requests.Session()
+
         self.headers['Referer'] = 'https://www.biman-airlines.com/'
-        old_header = dict(self.headers)
-        self.headers['X-Hash-Validate'] = "&".join([x + "=" + self.flight[x] for x in self.flight])
         self.headers['X-Requested-With'] = "XMLHttpRequest"
-        request = s.head('https://www.biman-airlines.com/bookings/captcha.aspx',
-                                headers=self.headers,
-                                verify=False)
-
-        self.headers = old_header
-        #self.headers['Cookie'] = "BNI_bg_zapways=" + request.cookies['BNI_bg_zapways'] + \";chocolateChip=" + request.cookies['chocolateChip']
-        self.flight['FS'] = request.headers['X-Hash']
-
         request = s.get('https://www.biman-airlines.com/shell.asp?get = bookings.css',
-                        headers=old_header,
+                        headers=self.headers,
                         verify=False)
 
+        cookies = requests.utils.dict_from_cookiejar(request.cookies)
+        print(cookies)
+        print request.headers
+        old_header = dict(self.headers)
+        self.headers['X-Hash-Validate'] = "&".join([x[0] + "=" + x[1] for x in self.flight])
+
+        request = s.head('https://www.biman-airlines.com/bookings/captcha.aspx',
+                                 headers=self.headers,
+                                 verify=False, cookies = cookies)
+        #
+        cookies.update({'chocolateChip':requests.utils.dict_from_cookiejar(request.cookies)['chocolateChip']})
+        print(cookies)
+        self.headers = old_header
+        # #self.headers['Cookie'] = "BNI_bg_zapways=" + request.cookies['BNI_bg_zapways'] + \";chocolateChip=" + request.cookies['chocolateChip']
+        print request.headers
+        self.flight.append(('FS',request.headers['x-hash']))
+
+
+
         request = s.get('https://www.biman-airlines.com/bookings/flight_selection.aspx',
-                               headers=old_header,
-                               verify=False)
+                               headers=self.headers,
+                               params=self.flight,
+                               verify=False,cookies = cookies)
         print request.status_code
+        print request.headers
+        #print s.cookies
         if request.status_code == '404':
             raise ValueError
 
@@ -55,3 +68,8 @@ class Biman(Scraper):
 
         '''text = open('biman_res_return.txt', 'r').read()
         self.content = etree.HTML(text)'''
+
+
+# scr = Biman('www.biman-airlines.com', 'DAC', "KUL", "16/01/2018")
+# scr.make_request()
+# scr.combine_flights()

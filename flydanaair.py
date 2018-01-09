@@ -11,8 +11,8 @@ class Flydanaair(Scraper):
         self.content = ''
 
         if self.return_date:
-            self.flight.update({'RM': self.ryear + '-' + self.rmonth,
-                                'RD': self.rday})
+            self.flight += [('RM', self.ryear + '-' + self.rmonth),
+                            ('RD', self.rday)]
 
     def make_request(self):
         request = requests.get('https://secure.flydanaair.com/bookings/flight_selection.aspx',
