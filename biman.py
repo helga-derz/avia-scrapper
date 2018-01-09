@@ -1,5 +1,5 @@
 import requests
-from bookingengine import Scraper, Flight
+from bookingengine import Scraper
 from lxml import etree
 
 
@@ -45,11 +45,3 @@ class Biman(Scraper):
             raise ValueError
 
         self.content = etree.HTML(request.content)
-
-        '''text = open('biman_res_return.txt', 'r').read()
-        self.content = etree.HTML(text)'''
-
-
-# scr = Biman('www.biman-airlines.com', 'DAC', "KUL", "16/01/2018",'20/01/2018')
-# scr.make_request()
-# scr.combine_flights()

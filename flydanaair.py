@@ -1,5 +1,5 @@
 import requests
-from bookingengine import Scraper, Flight
+from bookingengine import Scraper
 from lxml import etree
 
 
@@ -19,7 +19,6 @@ class Flydanaair(Scraper):
                                params=self.flight,
                                headers=self.headers,
                                verify=False)
-        #print request.status_code
         if request.status_code == '404':
             raise ValueError
         self.content = etree.HTML(request.content)
