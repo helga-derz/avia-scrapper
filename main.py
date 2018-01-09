@@ -1,5 +1,7 @@
 import biman
 import flydanaair
+import warnings
+warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
 
@@ -24,6 +26,8 @@ if __name__ == '__main__':
                 scr = flydanaair.Flydanaair('secure.flydanaair.com', f, d, df, dd)
             else:
                 scr = biman.Biman('www.biman-airlines.com', f, d, df, dd)
+            scr.make_request()
+            scr.combine_flights()
 
         except ValueError:
             print "You input some incorrect information"
