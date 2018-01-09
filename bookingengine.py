@@ -68,11 +68,11 @@ class Flight(object):
 
 class Scraper(object):
 
-    def __init__(self, host, dc, ac, date, return_date=None):
+    def __init__(self, dc, ac, date, return_date=None):
         self.headers = {
             'User-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML,'
                           ' like Gecko)Chrome/63.0.3239.84 Safari/537.36',
-            'Host': host, 'Upgrade-Insecure-Requests': '1',
+            'Host': self.host, 'Upgrade-Insecure-Requests': '1',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
         }
@@ -100,7 +100,7 @@ class Scraper(object):
                     raise ValueError
 
         except ValueError or TypeError:
-            print 'некорректная дата'
+            print 'incorrect date'
             raise ValueError
 
         self.flight = [
@@ -143,16 +143,20 @@ class Scraper(object):
                 else:
                     cur_fl.costs.append(None)
             cur_fl.classes = classes
-            flights.append(cur_fl)
+
+            if cur_fl.costs:
+                flights.append(cur_fl)
+
         return flights
 
     def combine_flights(self):
+        flights_to = self.get_info('to')
+
         if not self.return_date:
-            for flight in self.get_info('to'):
+            for flight in flights_to:
                 print flight
         else:
 
-            flights_to = self.get_info('to')
             flights_return = self.get_info('return')
 
             res = []

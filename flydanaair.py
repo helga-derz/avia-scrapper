@@ -1,12 +1,18 @@
 import requests
 from bookingengine import Scraper
-from lxml import etree
-
+from lxml.etree import HTML
 
 class Flydanaair(Scraper):
 
-    def __init__(self, host, dc, ac, date, return_date=None):
-        super(Flydanaair, self).__init__(host, dc, ac, date, return_date)
+    def __init__(self, dc, ac, date, return_date=None):
+
+        main_page = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
+        available_airports = main_page.xpath('//*[@id="first_section"]/div/select[@name="DC"]/option/@value')[1:]
+        if dc not in available_airports or ac not in available_airports:
+            raise ReferenceError
+
+        self.host = 'secure.flydanaair.com'
+        super(Flydanaair, self).__init__(dc, ac, date, return_date)
         self.currency = 'NGN'
         self.content = ''
 
@@ -19,7 +25,5 @@ class Flydanaair(Scraper):
                                params=self.flight,
                                headers=self.headers,
                                verify=False)
-        if request.status_code == '404':
-            raise ValueError
-        self.content = etree.HTML(request.content)
 
+        self.content = HTML(request.content)
