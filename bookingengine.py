@@ -143,7 +143,7 @@ class Scraper(object):
                     cur_fl.costs.append(None)
             cur_fl.classes = classes
             flights.append(cur_fl)
-            return flights
+        return flights
 
     def combine_flights(self):
         if not self.return_date:

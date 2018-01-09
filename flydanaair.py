@@ -24,29 +24,3 @@ class Flydanaair(Scraper):
             raise ValueError
         self.content = etree.HTML(request.content)
 
-    '''def get_info(self, direction):
-        flights = []
-        trip_num = '2' if direction == 'return' else '1'
-        table_node = self.content.xpath(
-            "//*[starts-with(@id, 'trip_{0}') and contains(@class, 'requested-date')]".format(trip_num)
-        )
-        if not table_node:
-            raise NotImplementedError
-        classes = table_node[0].xpath(".//thead/tr/th/span/text()")
-        tbody_node = table_node[0].xpath(".//tbody/tr")
-        for item in tbody_node:
-            cur_fl = Flight()
-            cur_fl.currency = 'NGN'
-            cur_fl.leaving_time = item.xpath('.//td[@class="time leaving"]/text()')[0]
-            cur_fl.landing_time = item.xpath('.//td[@class="time landing"]/text()')[0]
-            cur_fl.calculate_duration()
-            classes_node = item.xpath(".//*[starts-with(@class, 'family')]/label")
-            for fl in classes_node:
-                cost = fl.xpath(".//span/text()")
-                if cost:
-                    cur_fl.costs.append(cost[0])
-                else:
-                    cur_fl.costs.append(None)
-            cur_fl.classes = classes
-            flights.append(cur_fl)
-            return flights'''

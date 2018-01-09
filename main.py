@@ -15,8 +15,8 @@ if __name__ == '__main__':
 
         f = raw_input("Depature city:")
         d = raw_input("Destination city:")
-        df = raw_input("Depature date:")
-        dd = raw_input("Return date(if needed):")
+        df = raw_input("Depature date (DD/MM/YYYY):")
+        dd = raw_input("Return date (if needed):")
 
         if not dd:
             dd = None
