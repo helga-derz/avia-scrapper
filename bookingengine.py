@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from exceptions import *
 
 
 def reformat_date(date):
@@ -20,6 +21,7 @@ class Flight(object):
         self.with_cost = True
 
     def calculate_duration(self):
+
         if "AM" in self.landing_time:
             self.landing_time = self.landing_time.replace(" AM", "")
 
@@ -72,9 +74,7 @@ class Scraper(object):
         self.headers = {
             'User-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML,'
                           ' like Gecko)Chrome/63.0.3239.84 Safari/537.36',
-            'Host': self.host, 'Upgrade-Insecure-Requests': '1',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
+            'Host': self.host
         }
 
         self.from_ = dc
@@ -84,7 +84,7 @@ class Scraper(object):
         try:
             d = map(int, date.split('/'))
             if len(d) != 3:
-                raise ValueError
+                raise IncorrectDate
             self.date = datetime.date(d[2], d[1], d[0])
             self.day, self.month, self.year = reformat_date(self.date)
             today = datetime.date.today()
@@ -116,17 +116,14 @@ class Scraper(object):
             ('CD', '')
             ]
 
-    def change_ip(self):
-        pass
-
     def get_info(self, direction):
         flights = []
         trip_num = '2' if direction == 'return' else '1'
         table_node = self.content.xpath(
-            "//*[starts-with(@id, 'trip_{0}') and contains(@class, 'requested-date')]".format(trip_num)
+            "//*[starts-with(@id, 'trip_{}') and contains(@class, 'requested-date')]".format(trip_num)
         )
         if not table_node:
-            raise NotImplementedError
+            raise FlightsNotFound
         classes = table_node[0].xpath(".//thead/tr/th/span/text()")
         tbody_node = table_node[0].xpath(".//tbody/tr")
         for item in tbody_node:

@@ -1,6 +1,6 @@
 import requests
-from bookingengine import Scraper
 from lxml.etree import HTML
+from bookingengine import Scraper
 
 
 class Biman(Scraper):
@@ -34,16 +34,18 @@ class Biman(Scraper):
         old_header = dict(self.headers)
         self.headers['X-Hash-Validate'] = "&".join([x[0] + "=" + x[1] for x in self.flight])
 
-        request = web_session.head('https://www.biman-airlines.com/bookings/captcha.aspx',
-                         headers=self.headers,
-                         verify=False)
+        request = web_session.head(
+            'https://www.biman-airlines.com/bookings/captcha.aspx',
+            headers=self.headers,
+            verify=False
+        )
 
         self.headers = old_header
         self.flight.append(('FS', request.headers['x-hash']))
 
         request = web_session.get('https://www.biman-airlines.com/bookings/flight_selection.aspx',
-                        headers=self.headers,
-                        params=self.flight,
-                        verify=False)
+                                  headers=self.headers,
+                                  params=self.flight,
+                                  verify=False)
 
         self.content = HTML(request.content)

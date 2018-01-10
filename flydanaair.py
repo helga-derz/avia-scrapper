@@ -1,6 +1,7 @@
 import requests
-from bookingengine import Scraper
 from lxml.etree import HTML
+from bookingengine import Scraper
+
 
 class Flydanaair(Scraper):
 

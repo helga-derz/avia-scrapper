@@ -1,6 +1,8 @@
+import warnings
 import biman
 import flydanaair
-import warnings
+from exceptions import *
+
 warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
@@ -21,17 +23,17 @@ if __name__ == '__main__':
         if not ret_date:
             ret_date = None
         try:
-            print "Your results:\n"
             if site == "f":
                 scr = flydanaair.Flydanaair(dep_city, dest_city, dep_date, ret_date)
             else:
                 scr = biman.Biman(dep_city, dest_city, dep_date, ret_date)
+            print "Your results:\n"
             scr.make_request()
             scr.combine_flights()
 
         except ValueError:
             print "You input some incorrect information"
-        except NotImplementedError:
+        except FlightsNotFound:
             print "There is no flights available for this date"
-        except ReferenceError:
+        except IncorrectAirport:
             print "You entered incorrect Departure or Destination city"
