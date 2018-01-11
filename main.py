@@ -4,14 +4,19 @@ from lxml.etree import HTML
 import datetime
 import biman
 import flydanaair
-from exceptions import *
+#from exceptions import *
+from my_exceptions import FlightsNotFound
 
 warnings.filterwarnings("ignore")
 
 
 def check_date(raw_date):
 
-    d = map(int, raw_date.split('/'))
+    try:
+        d = map(int, raw_date.split('/'))
+    except ValueError:
+        print 'Incorrect date format, try again'
+        return None
     if len(d) != 3:
         print 'Incorrect date format, try again'
         return None
@@ -26,19 +31,26 @@ def check_date(raw_date):
 if __name__ == '__main__':
 
     site = ''
+    main_page_f = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
+    available_airports_f = main_page_f.xpath(
+                '//*[@id="first_section"]/div/select[@name="DC"]/option/@value'
+            )[1:]
+
+    main_page_b = HTML(requests.get('https://www.biman-airlines.com', verify=False).content)
+    available_airports_b = main_page_b.xpath('//*[@name="DC"]/option/@value')[1:]
+
     while site != 'exit':
 
         print 'Input desire site (f - flydanaair, b - biman) or print exit to quit:'
         site = raw_input()
+        if site == 'exit':
+            continue
 
         if site == 'f':
-            main_page = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
-            available_airports = main_page.xpath(
-                '//*[@id="first_section"]/div/select[@name="DC"]/option/@value'
-            )[1:]
+            available_airports = available_airports_f
         elif site == 'b':
-            main_page = HTML(requests.get('https://www.biman-airlines.com', verify=False).content)
-            available_airports = main_page.xpath('//*[@name="DC"]/option/@value')[1:]
+            available_airports = available_airports_b
+
 
         while True:
             dep_city = raw_input('Departure city:\n')
@@ -80,5 +92,5 @@ if __name__ == '__main__':
             scr.make_request()
             scr.combine_flights()
 
-        except ReferenceError:
+        except FlightsNotFound:
             print 'There is no flights available for this date'

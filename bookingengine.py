@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-from exceptions import *
-
+from my_exceptions import *
 
 def reformat_date(date):
     """
@@ -105,8 +104,8 @@ class Scraper(object):
             ('TT', 'RT' if self.return_date else 'OW'),
             ('DC', dc),
             ('AC', ac),
-            ('AM', self.date.year + '-' + self.date.month),
-            ('AD', self.date.day),
+            ('AM', self.year + '-' + self.month),
+            ('AD', self.day),
             ('PA', '1'),
             ('PC', '0'),
             ('PI', '0'),
@@ -127,7 +126,7 @@ class Scraper(object):
         if not table_node:
             raise FlightsNotFound
         classes = table_node[0].xpath(".//thead/tr/th/span/text()")
-        tbody_node = table_node[0].xpath(".//tbody/tr")
+        tbody_node = table_node[0].xpath(".//tbody/tr[starts-with(@class, 'flight')]")
         for item in tbody_node:
             cur_fl = Flight()
             cur_fl.currency = self.currency
@@ -156,12 +155,18 @@ class Scraper(object):
 
         flights_to = self.get_info('to')
 
+        if not flights_to:
+            raise FlightsNotFound
+
         if not self.return_date:
             for flight in flights_to:
                 print flight
         else:
 
             flights_return = self.get_info('return')
+
+            if not flights_return:
+                raise FlightsNotFound
 
             res = []
 

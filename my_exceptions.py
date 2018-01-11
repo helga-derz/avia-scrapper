@@ -1,0 +1,3 @@
+
+class FlightsNotFound(Exception):
+    pass
