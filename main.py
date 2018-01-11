@@ -6,7 +6,7 @@ import biman
 import flydanaair
 from my_exceptions import FlightsNotFound
 
-warnings.filterwarnings("ignore")
+warnings.filterwarnings('ignore')
 
 
 def check_date(raw_date):
@@ -21,7 +21,7 @@ def check_date(raw_date):
         return None
     date = datetime.date(d[2], d[1], d[0])
     today = datetime.date.today()
-    if date <= today:
+    if date < today:
         print 'This date has already passed, enter other date'
         return None
     return date
