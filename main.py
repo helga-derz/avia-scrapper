@@ -50,7 +50,6 @@ if __name__ == '__main__':
         elif site == 'b':
             available_airports = available_airports_b
 
-
         while True:
             dep_city = raw_input('Departure city:\n')
             if dep_city not in available_airports:
