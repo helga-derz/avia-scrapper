@@ -4,6 +4,10 @@ from exceptions import *
 
 
 def reformat_date(date):
+    """
+    Parsing date and adding '0' if day/month contains only one character.
+    """
+
     day = str(date.day) if len(str(date.day)) == 2 else '0' + str(date.day)
     month = str(date.month) if len(str(date.month)) == 2 else '0' + str(date.month)
     year = str(date.year)
@@ -11,6 +15,10 @@ def reformat_date(date):
 
 
 class Flight(object):
+    """
+    Defining all flight details (leaving/landing time, cost etc).
+    """
+
     def __init__(self):
         self.leaving_time = None
         self.landing_time = None
@@ -21,6 +29,9 @@ class Flight(object):
         self.with_cost = True
 
     def calculate_duration(self):
+        """
+        Calculating the duration of a flight.
+        """
 
         if "AM" in self.landing_time:
             self.landing_time = self.landing_time.replace(" AM", "")
@@ -69,8 +80,13 @@ class Flight(object):
 
 
 class Scraper(object):
+    """
+    The main handler of entered data.
+    Provides all needed information from http response and then produce
+    all possible combinations of flights.
+    """
 
-    def __init__(self, dc, ac, date, return_date=None):
+    def __init__(self, dc, ac, date, return_date):
         self.headers = {
             'User-agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML,'
                           ' like Gecko)Chrome/63.0.3239.84 Safari/537.36',
@@ -79,44 +95,30 @@ class Scraper(object):
 
         self.from_ = dc
         self.to = ac
+        self.date = date
+        self.day, self.month, self.year = reformat_date(self.date)
         self.return_date = return_date
-
-        try:
-            d = map(int, date.split('/'))
-            if len(d) != 3:
-                raise IncorrectDate
-            self.date = datetime.date(d[2], d[1], d[0])
-            self.day, self.month, self.year = reformat_date(self.date)
-            today = datetime.date.today()
-            if self.date <= today:
-                raise ValueError
-            if return_date:
-                d = map(int, return_date.split('/'))
-                if len(d) != 3:
-                    raise ValueError
-                self.return_date = datetime.date(d[2], d[1], d[0])
-                self.rday, self.rmonth, self.ryear = reformat_date(self.return_date)
-                if self.return_date < self.date:
-                    raise ValueError
-
-        except ValueError or TypeError:
-            print 'incorrect date'
-            raise ValueError
+        if return_date:
+            self.rday, self.rmonth, self.ryear = reformat_date(self.return_date)
 
         self.flight = [
             ('TT', 'RT' if self.return_date else 'OW'),
             ('DC', dc),
             ('AC', ac),
-            ('AM', self.year + '-' + self.month),
-            ('AD', self.day),
+            ('AM', self.date.year + '-' + self.date.month),
+            ('AD', self.date.day),
             ('PA', '1'),
             ('PC', '0'),
             ('PI', '0'),
             ('FL', 'on'),
             ('CD', '')
-            ]
+        ]
 
     def get_info(self, direction):
+        """
+        Getting all needed flight details with x-path requests and creating a list of flights.
+        """
+
         flights = []
         trip_num = '2' if direction == 'return' else '1'
         table_node = self.content.xpath(
@@ -147,6 +149,11 @@ class Scraper(object):
         return flights
 
     def combine_flights(self):
+        """
+        Printing out all flights sorted by cost and create all possible combinations
+        in case of return flight.
+        """
+
         flights_to = self.get_info('to')
 
         if not self.return_date:
