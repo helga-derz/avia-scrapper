@@ -13,7 +13,6 @@ class Biman(Scraper):
 
         self.host = 'www.biman-airlines.com'
         super(Biman, self).__init__(dc, ac, date, return_date)
-        self.currency = 'BDT'
         self.content = ''
 
         if self.return_date:

@@ -13,7 +13,6 @@ class Flydanaair(Scraper):
 
         self.host = 'secure.flydanaair.com'
         super(Flydanaair, self).__init__(dc, ac, date, return_date)
-        self.currency = 'NGN'
         self.content = ''
 
         if self.return_date:

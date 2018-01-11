@@ -4,7 +4,6 @@ from lxml.etree import HTML
 import datetime
 import biman
 import flydanaair
-#from exceptions import *
 from my_exceptions import FlightsNotFound
 
 warnings.filterwarnings("ignore")

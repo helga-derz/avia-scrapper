@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
-from my_exceptions import *
+from my_exceptions import FlightsNotFound
+
 
 def reformat_date(date):
     """
@@ -129,11 +130,11 @@ class Scraper(object):
         tbody_node = table_node[0].xpath(".//tbody/tr[starts-with(@class, 'flight')]")
         for item in tbody_node:
             cur_fl = Flight()
-            cur_fl.currency = self.currency
             cur_fl.leaving_time = item.xpath('.//td[@class="time leaving"]/text()')[0]
             cur_fl.landing_time = item.xpath('.//td[@class="time landing"]/text()')[0]
             cur_fl.calculate_duration()
             classes_node = item.xpath(".//*[starts-with(@class, 'family')]/label")
+            cur_fl.currency = classes_node[0].xpath(".//span/b/text()")[0]
             for fl in classes_node:
                 cost = fl.xpath(".//span/text()")
                 if cost:
