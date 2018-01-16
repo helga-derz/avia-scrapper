@@ -9,8 +9,20 @@ from my_exceptions import FlightsNotFound
 warnings.filterwarnings('ignore')
 
 
-def check_date(raw_date):
+def memoize(func):
+    cache = dict()
 
+    def memorized_func(*args):
+        if args in cache:
+            return cache[args]
+        result = func(*args)
+        cache[args] = result
+        return result
+
+    return memorized_func
+
+
+def check_date(raw_date):
     try:
         d = map(int, raw_date.split('/'))
     except ValueError:
@@ -27,6 +39,20 @@ def check_date(raw_date):
     return date
 
 
+@memoize
+def get_airports(airline):
+    av_airports = None
+    if airline == 'f':
+        main_page = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
+        av_airports = main_page.xpath(
+            '//*[@id="first_section"]/div/select[@name="DC"]/option/@value'
+        )[1:]
+    if airline == 'b':
+        main_page = HTML(requests.get('https://www.biman-airlines.com', verify=False).content)
+        av_airports = main_page.xpath('//*[@name="DC"]/option/@value')[1:]
+    return av_airports
+
+
 if __name__ == '__main__':
 
     site = ''
@@ -40,15 +66,16 @@ if __name__ == '__main__':
 
     while site != 'exit':
 
-        print 'Input desire site (f - flydanaair, b - biman) or print exit to quit:'
-        site = raw_input()
-        if site == 'exit':
-            continue
-
-        if site == 'f':
-            available_airports = available_airports_f
-        elif site == 'b':
-            available_airports = available_airports_b
+        while True:
+            print 'Input desire airline (f - flydanaair, b - biman) or print exit to quit:'
+            site = raw_input()
+            if site == 'exit':
+                continue
+            available_airports = get_airports(site)
+            if not available_airports:
+                print 'You entered incorrect airline, try again'
+            else:
+                break
 
         while True:
             dep_city = raw_input('Departure city:\n')
