@@ -56,13 +56,6 @@ def get_airports(airline):
 if __name__ == '__main__':
 
     site = ''
-    main_page_f = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
-    available_airports_f = main_page_f.xpath(
-                '//*[@id="first_section"]/div/select[@name="DC"]/option/@value'
-            )[1:]
-
-    main_page_b = HTML(requests.get('https://www.biman-airlines.com', verify=False).content)
-    available_airports_b = main_page_b.xpath('//*[@name="DC"]/option/@value')[1:]
 
     while site != 'exit':
 
