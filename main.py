@@ -10,6 +10,10 @@ warnings.filterwarnings('ignore')
 
 
 def memoize(func):
+    """
+    Allows not to process a func with same args.
+    """
+
     cache = dict()
 
     def memorized_func(*args):
@@ -23,6 +27,12 @@ def memoize(func):
 
 
 def check_date(raw_date):
+    """
+    Checking validness of a date.
+    :param raw_date: date in DD/MM/YYYY format
+    :return: date in datetime format or None if the date is incorrect
+    """
+
     try:
         d = map(int, raw_date.split('/'))
     except ValueError:
@@ -41,6 +51,12 @@ def check_date(raw_date):
 
 @memoize
 def get_airports(airline):
+    """
+    Getting a list of available airports via http request.
+    :param airline: id of airline (a letter)
+    :return: list of available airports or None if incorrect airline
+    """
+
     av_airports = None
     if airline == 'f':
         main_page = HTML(requests.get('http://www.flydanaair.com/', verify=False).content)
